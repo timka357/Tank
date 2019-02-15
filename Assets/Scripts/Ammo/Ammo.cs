@@ -24,7 +24,7 @@ public abstract class Ammo : MonoBehaviour
         _rigidbody = transform.GetComponent<Rigidbody>();
     }
 
-    protected void OnEnable()
+    protected virtual void OnEnable()
     {
         _lifeTimer.On();
     }

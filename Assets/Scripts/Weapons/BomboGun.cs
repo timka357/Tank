@@ -13,6 +13,7 @@ public class BomboGun : Weapon
 
     public override void Fire()
     {
+        base.Fire();
         if (IsCurrentGun)
         {
             Vector3 forceVector = Quaternion.Euler(-yAngle, 0,0)*SpawnPosition.forward;

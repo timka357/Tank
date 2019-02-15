@@ -14,9 +14,6 @@ public class StandartAmmo : Ammo
         if (collision.collider.CompareTag("Enemy"))
         {
             collision.transform.GetComponent<IHaveHealth>().GetDamage(_damage);
-
-            //collision.transform.GetComponent<IHaveHealth>()
-            //effect
         }
         Deactivate();
     }

@@ -11,6 +11,7 @@ public class StandartGun : Weapon
 
     public override void Fire()
     {
+        base.Fire();
         if (IsCurrentGun)
         {
             _bulletPool.GetObjectFromPool().GetRigidbody.AddForce(SpawnPosition.forward * Force, ForceMode.Impulse);

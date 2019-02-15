@@ -8,28 +8,76 @@ using UnityEngine.UI;
 public class UIManager : BasePage
 {
     private FixedJoystick _bodyJoystick, _turretJoystick;
+    private Transform GamePanel, ExitPanel;
 
-    private Button _fireButton, _changeWeaponButton;
-    private Action fireAction, changeWeaponAction;
+    private Button _fireButton, _changeWeaponButton, _exitButton, _resetButton;
+    private Slider _healthSlider, _rechargeSlider;
+    private Action fireAction, changeWeaponAction, resetGame;
+
+    private TankController Tank;
 
     private void Awake()
-    {
-        _bodyJoystick = transform.Find("BodyJoystick").GetComponent<FixedJoystick>();
-        _turretJoystick = transform.Find("TurretJoystick").GetComponent<FixedJoystick>();
+    { 
+        GamePanel = transform.Find("GamePanel");
+        ExitPanel = transform.Find("ExitPanel");
+        _exitButton = ExitPanel.Find("Exit").GetComponent<Button>();
+        _resetButton = ExitPanel.Find("Reset").GetComponent<Button>();
+        ExitPanel.gameObject.SetActive(false);
+        _bodyJoystick = GamePanel.Find("BodyJoystick").GetComponent<FixedJoystick>();
+        _turretJoystick = GamePanel.Find("TurretJoystick").GetComponent<FixedJoystick>();
+        _healthSlider = GamePanel.Find("HealthBar").GetComponent<Slider>();
+        _rechargeSlider = GamePanel.Find("RechargeBar").GetComponent<Slider>();
 
-        _fireButton = transform.Find("FireButton").GetComponent<Button>();
-        _changeWeaponButton = transform.Find("ChangeWeaponButton").GetComponent<Button>();
+        _fireButton = GamePanel.Find("FireButton").GetComponent<Button>();
+        _changeWeaponButton = GamePanel.Find("ChangeWeaponButton").GetComponent<Button>();
     }
 
     public override void Init()
     {
         base.Init();
-        _fireButton.onClick.AddListener(FireClick);
-        _changeWeaponButton.onClick.AddListener(ChangeWeaponClick);
-
-        TankController Tank = Main.Instance.GetController<TankController>();
+        Tank = Main.Instance.GetController<TankController>();
         changeWeaponAction += Tank.ChangeWeapon;
         fireAction += Tank.Fire;
+        resetGame += Tank.ResetPlayer;
+        resetGame += Main.Instance.GetController<MonsterController>().Reset;
+
+        Tank.HealthChanged += SetHealthBar;
+        Tank.SetCurrTime += SetRechargeTime;
+        Tank.PlayerDead += PlayerDead;
+        Tank.TimerForRechargeChanged += SetNewRechargeTime;
+
+        _fireButton.onClick.AddListener(FireClick);
+        _changeWeaponButton.onClick.AddListener(ChangeWeaponClick);
+        _exitButton.onClick.AddListener(Application.Quit);
+        _resetButton.onClick.AddListener(ResetGame);
+    }
+
+    private void ResetGame()
+    {
+        ExitPanel.gameObject.SetActive(false);
+        GamePanel.gameObject.SetActive(true);
+        if (resetGame != null) resetGame();
+    }
+
+    private void PlayerDead()
+    {
+        GamePanel.gameObject.SetActive(false);
+        ExitPanel.gameObject.SetActive(true);
+    }
+
+    private void SetHealthBar(int health)
+    {
+        _healthSlider.value = health;
+    }
+
+    private void SetNewRechargeTime(float valeu)
+    {
+        _rechargeSlider.maxValue = valeu;
+    }
+
+    private void SetRechargeTime(float valeu)
+    {
+        _rechargeSlider.value = valeu;
     }
 
     public float GetHorizontalAxis()

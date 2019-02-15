@@ -9,6 +9,11 @@ public class ObjectPool<T> where T : MonoBehaviour
 
     private Transform _transformPositionAndRotation, _parent;
 
+    public int CountActiveObject
+    {
+        get; private set;
+    }
+
     public List<T> PoolObjects
     {
         get { return _poolObjects; }
@@ -19,7 +24,9 @@ public class ObjectPool<T> where T : MonoBehaviour
         _poolObjectPrefab = prefab;
         _transformPositionAndRotation = position;
         _parent = parent;
-        
+
+        CountActiveObject = 0;
+
         _poolObjects = new List<T>();
 
         for (int i = 0; i < count; i++)
@@ -37,16 +44,23 @@ public class ObjectPool<T> where T : MonoBehaviour
         _poolObjects.Clear();
     }
 
-    public void AddObjectToPool()
+    public void AddObjectToPool(T prefab = null)
     {
-        T newObject = MonoBehaviour.Instantiate(_poolObjectPrefab).GetComponent<T>();
+        if (prefab != null) _poolObjectPrefab = prefab;
 
+        T newObject = MonoBehaviour.Instantiate(_poolObjectPrefab).GetComponent<T>();
         newObject.transform.SetParent(_parent);
         newObject.transform.localPosition = Vector3.zero;
         newObject.transform.localRotation = Quaternion.identity;
         newObject.gameObject.SetActive(false);
 
         _poolObjects.Add(newObject);
+    }
+
+    public void AddObjectsToPool(T prefab, int count)
+    {
+        for (int i = 0; i < count; i++)
+            AddObjectToPool(prefab);
     }
 
     public T GetObjectFromPool()
@@ -63,6 +77,7 @@ public class ObjectPool<T> where T : MonoBehaviour
                 freeObject.transform.rotation = _transformPositionAndRotation.rotation;
             }
             freeObject.gameObject.SetActive(true);
+            CountActiveObject++;
             return freeObject;
         }
 
@@ -74,5 +89,6 @@ public class ObjectPool<T> where T : MonoBehaviour
         obj.gameObject.SetActive(false);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.identity;
+        CountActiveObject--;
     }
 }

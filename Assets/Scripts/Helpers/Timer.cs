@@ -17,15 +17,20 @@ public class Timer
         get; private set;
     }
 
+    public float GetCurrTime
+    {
+        get { return _temp; }
+    }
+
     public void Update()
     {
         if (IsActive && !TimeOver)
         {
-            if(_temp>0)
+            if(_temp<_elapsed)
             {
-                _temp -= Time.deltaTime;
+                _temp += Time.deltaTime;
             }
-            if(_temp<= 0)
+            if(_temp>=_elapsed)
             {
                 TimeOver = true;
             }
@@ -45,7 +50,7 @@ public class Timer
 
     public void ResetTimer()
     {
-        _temp = _elapsed;
+        _temp = 0;
         TimeOver = false;
     }
 

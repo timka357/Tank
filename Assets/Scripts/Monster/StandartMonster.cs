@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class StandartMonster : Monster
     [SerializeField]
     protected float _cooldownTime = 1f;
 
-    private Timer _getHitTimer;
+    protected Timer _getHitTimer;
     protected Animator _animator;
     protected Timer _cooldownTimer;
 
@@ -36,43 +37,33 @@ public class StandartMonster : Monster
                 _getHitTimer.Off();
                 _agent.isStopped = false;
             }
-
-            if (Vector3.Distance(transform.position, _goal.position) < _distanceForAttack)
-            {
-                Attack();
-            }
-            else
-            {
-                RunToGoal();
-            }
         }
     }
 
-    protected void Attack()
+    protected override void Attack()
     {
-        _cooldownTimer.Update();
-        if (_cooldownTimer.TimeOver && _cooldownTimer.IsActive)
+        if (!_agent.isStopped)
         {
-            _animator.SetTrigger("Attack");
-            _cooldownTimer.ResetTimer(); ;
-            _goal.GetComponent<IHaveHealth>().GetDamage(_damage);
+            _cooldownTimer.Update();
+            if (_cooldownTimer.TimeOver && _cooldownTimer.IsActive)
+            {
+                transform.LookAt(_goal);
+                _animator.SetTrigger("Attack");
+                _cooldownTimer.ResetTimer(); ;
+                _goal.GetComponent<IHaveHealth>().GetDamage(_damage);
+            }
         }
     }
 
-    protected void RunToGoal()
+    protected override void RunToGoal()
     {
-        if(_isAlive)
+        if (_isAlive)
             _animator.SetTrigger("Run");
     }
 
     protected override void OnEnable()
     {
         base.OnEnable();
-    }
-
-    public override void ResetMonstr()
-    {
-        base.ResetMonstr();
         _cooldownTimer.On();
         _currentHealth = Health;
         _agent.isStopped = false;
@@ -82,7 +73,16 @@ public class StandartMonster : Monster
     protected override void OnDisable()
     {
         base.OnDisable();
+    }
+
+    protected override void Dead()
+    {
+        base.Dead();
+        _isAlive = false;
         _cooldownTimer.Off();
+        _agent.isStopped = true;
+        _getHitTimer.Off();
+        _animator.Play("Dead");
     }
 
     public override void GetDamage(int damage)
@@ -94,16 +94,6 @@ public class StandartMonster : Monster
             _agent.isStopped = true;
             _getHitTimer.On();
         }
-    }
-
-    protected override void Dead()
-    {
-        _isAlive = false;
-        _cooldownTimer.Off();
-        _agent.isStopped = true;
-        _getHitTimer.Off();
-        _animator.Play("Dead");
-        // get object to spawnManager or Pool
     }
 
     /*public bool IsAnimationPlaying(string animationName)

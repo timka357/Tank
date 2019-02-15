@@ -14,6 +14,9 @@ public abstract class Weapon : MonoBehaviour
     protected GameObject _ammo;
 
     [SerializeField]
+    protected ParticleSystem fireEffect;
+
+    [SerializeField]
     protected int _countOfBulletInPool;
 
     protected Transform _spawnTransform, _ammoTransform;
@@ -53,6 +56,8 @@ public abstract class Weapon : MonoBehaviour
         _ammoTransform = GameObject.Find("Ammo").transform;
         _bulletPool = new ObjectPool<Ammo>();
         if (_ammo != null) InitPool();
+        fireEffect = Instantiate(fireEffect, transform);
+        fireEffect.transform.position = _spawnTransform.position;
     }
 
     public void InitPool()
@@ -65,7 +70,13 @@ public abstract class Weapon : MonoBehaviour
         }
     }
 
-    public abstract void Fire();
+    public virtual void Fire()
+    {
+        if (fireEffect != null)
+        {
+            fireEffect.Play();
+        }
+    }
 
     public void Hide()
     {

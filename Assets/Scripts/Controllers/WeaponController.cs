@@ -5,16 +5,21 @@ using UnityEngine;
 public class WeaponController : BaseController
 {
     private int _currentWeapon = 0;
-    [SerializeField]
-    private Weapon[] _weaponPrefabs;
+    public Weapon[] _weaponPrefabs;
 
     private List<Weapon> _weaponList;
-    protected Timer _rechargeTimer;
+    private Timer _rechargeTimer;
+    private Transform _parentForWeapon;
     private bool _isCanFire = false;
 
     public bool IsCanFire
     {
         get { return _isCanFire; }
+    }
+
+    public float CurrRechargeTime
+    {
+        get { return _rechargeTimer.GetCurrTime; }
     }
 
     public Weapon CurrentWeapon { get { return _weaponList[_currentWeapon]; } }
@@ -24,6 +29,7 @@ public class WeaponController : BaseController
         _weaponList = new List<Weapon>();
         _rechargeTimer = new Timer();
 
+        _parentForWeapon = transform.Find("Turret/Weapons").transform;
         if (_weaponPrefabs != null && _weaponPrefabs.Length > 0)
         {
             foreach (var weapon in _weaponPrefabs)
@@ -51,7 +57,7 @@ public class WeaponController : BaseController
 
     public void AddNewWeapon(Weapon weapon)
     {
-        _weaponList.Add(Instantiate(weapon, transform));
+        _weaponList.Add(Instantiate(weapon, _parentForWeapon));
         _weaponList[_weaponList.Count - 1].Hide();
 
         if (_weaponList.Count == 1)
@@ -69,6 +75,7 @@ public class WeaponController : BaseController
             {
                 if (_weaponList.IndexOf(weapon) < _currentWeapon) _currentWeapon--;
                 _weaponList.Remove(weapon);
+                Destroy(weapon);
             }
             else
             {
